@@ -15,11 +15,12 @@
 
 | Revision date | Version # | Description | Author |
 | :---: | :---: | :---: | :---: |
-| 2026-03-21 | 1.0.0 | Initial Concept | Nam Jae-min |
+| 2026-03-21 | 1.0.0 | Initial Concept |Nam Jae-min |
+| 2026-03-27 | 1.0.1 |  Edit project description | Nam Jae-min|
 </h2>
 
 <br><br><br><br><br><br>
-
+<h2 style="border-bottom: none;">
 = Contents =
 <pre>
 <span style="font-size: 14pt;">
@@ -41,19 +42,21 @@
 </h2>
 </div>
 <br><br><br><br><br><br><br><br>
-<h2>
 
-1. Bussiness purpose
 <h2>
+1. Bussiness purpose
+</h2>
 </span>
+
+
+
+<h3 style="border-bottom: none;">
+1-1. Project Background
+</h3>
 
 
 <div style="line-height: 1.6;">
 <span style="font-size: 12pt;">
-<h3>
-1-1. Project Background
-</h3>
-
 <img width="700" height="530" alt="image" src="image/trash img.png" />
 
   
@@ -89,7 +92,7 @@
 </span>
 
 <br><br><br><br><br><br><br><br>
-
+<h2>
 2. System context diagram<br>
 </h2>
 <div align="center"> 
