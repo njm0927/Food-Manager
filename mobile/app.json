@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Food Manager",
+    "slug": "food-manager",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ecfdf5"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.foodmanager.app"
+    },
+    "android": {
+      "package": "com.foodmanager.app",
+      "usesCleartextTraffic": true,
+      "permissions": ["POST_NOTIFICATIONS"]
+    },
+    "plugins": ["expo-notifications"],
+    "extra": {
+      "apiBaseUrl": "http://10.0.2.2:8080"
+    }
+  }
+}
