@@ -482,5 +482,4 @@ NFRS<br>
 </span>
 <div style="line-height: 1.6;">
 <span style="font-size: 12pt;">
-Kotlin: <a>https://kotlinlang.org/</a> <br>
 음식물 쓰레기 문제: <a>https://www.dokdok.co/brief/food-waste</a> <br>
