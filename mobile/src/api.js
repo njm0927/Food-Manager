@@ -31,9 +31,15 @@ export async function setApiBaseUrlOverride(value) {
 
 async function getApiCandidates() {
   const overrideBaseUrl = await getApiBaseUrlOverride();
+  const configuredBaseUrl = overrideBaseUrl || API_BASE_URL;
+  const isLocalConfigured = /127\.0\.0\.1|localhost|10\.0\.2\.2/.test(configuredBaseUrl);
+
+  if (configuredBaseUrl && !isLocalConfigured) {
+    return [configuredBaseUrl];
+  }
+
   return Array.from(new Set([
-    overrideBaseUrl,
-    API_BASE_URL,
+    configuredBaseUrl,
     Platform.OS === 'android' ? 'http://10.0.2.2:8080' : null,
     'http://127.0.0.1:8080',
     'http://localhost:8080',
@@ -117,3 +123,4 @@ export async function readApiDebugInfo() {
     candidates: await getApiCandidates(),
   };
 }
+

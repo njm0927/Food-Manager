@@ -1,0 +1,11 @@
+.git
+.github
+node_modules
+mobile/node_modules
+backend/target
+dist
+.env
+.env.*
+!.env.example
+npm-debug.log*
+

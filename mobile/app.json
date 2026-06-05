@@ -9,7 +9,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ecfdf5"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.foodmanager.app"
@@ -17,11 +19,28 @@
     "android": {
       "package": "com.foodmanager.app",
       "usesCleartextTraffic": true,
-      "permissions": ["POST_NOTIFICATIONS"]
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS"
+      ]
     },
-    "plugins": ["expo-notifications"],
+    "plugins": [
+      "expo-notifications",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
     "extra": {
-      "apiBaseUrl": "http://10.0.2.2:8080"
+      "apiBaseUrl": "http://43.201.78.197:8080",
+      "eas": {
+        "projectId": "33507c9f-4d5a-4a73-b45b-1f95c176bc52"
+      }
     }
   }
 }

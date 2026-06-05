@@ -35,5 +35,16 @@ services:
       timeout: 5s
       retries: 10
 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: food-manager-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-80}:80"
 volumes:
   food_manager_pgdata:
+
