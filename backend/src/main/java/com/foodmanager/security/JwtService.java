@@ -26,9 +26,9 @@ public class JwtService {
         try {
             Map<String, Object> header = Map.of("alg", "HS256", "typ", "JWT");
             Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("sub", user.id());
-            payload.put("userId", user.userId());
-            payload.put("role", user.role());
+            payload.put("sub", user.getId());
+            payload.put("userId", user.getUserId());
+            payload.put("role", user.getRole());
             payload.put("exp", Instant.now().plusSeconds(60L * 60L * 24L * 7L).getEpochSecond());
 
             String encodedHeader = encodeJson(header);
@@ -91,3 +91,4 @@ public class JwtService {
         }
     }
 }
+

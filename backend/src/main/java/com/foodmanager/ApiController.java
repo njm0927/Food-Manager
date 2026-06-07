@@ -59,6 +59,25 @@ public class ApiController {
         return authService.signup(request, "seller");
     }
 
+    public AuthService.AuthResponse signup(AuthService.SignupRequest request, String role) {
+        return authService.signup(request, role);
+    }
+
+    @PostMapping("/auth/logout")
+    public void logout(@RequestHeader("Authorization") String authorization) {
+        jwtService.requireUserId(authorization);
+    }
+
+    @GetMapping("/auth/check-business-number")
+    public AuthService.CheckBusinessNumberResponse checkBusinessNumber(@RequestParam String businessNumber) {
+        return authService.checkBusinessNumber(businessNumber);
+    }
+
+    @PostMapping("/auth/market-info")
+    public AuthService.MarketInfoResponse enterMarketInfo(@RequestBody AuthService.MarketInfoRequest request) {
+        return authService.enterMarketInfo(request);
+    }
+
     @GetMapping("/me")
     public AuthService.UserResponse me(@RequestHeader("Authorization") String authorization) {
         return authService.me(jwtService.requireUserId(authorization));
@@ -116,7 +135,7 @@ public class ApiController {
     public List<SaleService.SaleResponse> sales(@RequestHeader(value = "Authorization", required = false) String authorization, @RequestParam(required = false) String region) {
         if (authorization == null || authorization.isBlank()) return List.of();
         Long userId = jwtService.requireUserId(authorization);
-        String role = userRepository.findById(userId).map(user -> user.role()).orElse("");
+        String role = userRepository.findById(userId).map(user -> user.getRole()).orElse("");
         if ("seller".equals(role)) return saleService.findAll(userId);
         return saleService.findNearby(region);
     }
@@ -159,3 +178,5 @@ public class ApiController {
         return recipeClient.search(query);
     }
 }
+
+

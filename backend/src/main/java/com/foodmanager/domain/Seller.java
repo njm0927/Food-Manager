@@ -1,10 +1,15 @@
 package com.foodmanager.domain;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Seller extends User {
     private final String businessName;
     private final String businessOwnerName;
     private final String businessNumber;
     private final String businessCategory;
+    private final List<Sale> saleInfos = new ArrayList<>();
 
     public Seller(
             Long id,
@@ -28,7 +33,15 @@ public class Seller extends User {
         return businessName;
     }
 
+    public String getBusinessName() {
+        return businessName;
+    }
+
     public String businessOwnerName() {
+        return businessOwnerName;
+    }
+
+    public String getBusinessOwnerName() {
         return businessOwnerName;
     }
 
@@ -36,8 +49,26 @@ public class Seller extends User {
         return businessNumber;
     }
 
+    public String getBusinessNumber() {
+        return businessNumber;
+    }
+
     public String businessCategory() {
         return businessCategory;
+    }
+
+    public String getBusinessCategory() {
+        return businessCategory;
+    }
+
+    public void registerSaleInfo(Sale sale) {
+        if (sale != null) {
+            saleInfos.add(sale);
+        }
+    }
+
+    public List<Sale> getSaleInfos() {
+        return Collections.unmodifiableList(saleInfos);
     }
 
     public boolean canRegisterSaleInfo() {

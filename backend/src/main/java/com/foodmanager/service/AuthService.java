@@ -1,6 +1,7 @@
 package com.foodmanager.service;
 
 import com.foodmanager.domain.User;
+import com.foodmanager.domain.Seller;
 import com.foodmanager.repository.UserRepository;
 import com.foodmanager.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,6 +48,25 @@ public class AuthService {
     public record CheckIdResponse(boolean available) {
     }
 
+    public record CheckBusinessNumberResponse(boolean available, String message) {
+    }
+
+    public record MarketInfoRequest(
+            String businessName,
+            String businessOwnerName,
+            String businessNumber,
+            String businessCategory,
+            String postcode,
+            String address,
+            String detailAddress,
+            Double latitude,
+            Double longitude
+    ) {
+    }
+
+    public record MarketInfoResponse(String businessName, String businessOwnerName, String businessNumber, String businessCategory) {
+    }
+
     public record AddressRequest(String postcode, String address, String detailAddress, Double latitude, Double longitude) {
     }
 
@@ -63,7 +83,7 @@ public class AuthService {
         User user = userRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다."));
 
-        if (!passwordEncoder.matches(request.password(), user.passwordHash())) {
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
@@ -81,11 +101,53 @@ public class AuthService {
 
         User user = userRepository.createUser(request, role, passwordEncoder.encode(request.password()));
         if ("seller".equals(role)) {
-            userRepository.createAddress(user.id(), request);
-            userRepository.createSellerInfo(user.id(), request);
+            userRepository.createAddress(user.getId(), request);
+            userRepository.createSellerInfo(user.getId(), request);
         }
 
         return toAuthResponse(user);
+    }
+
+    public CheckBusinessNumberResponse checkBusinessNumber(String businessNumber) {
+        String normalizedBusinessNumber = normalizeBusinessNumber(businessNumber);
+        if (!normalizedBusinessNumber.matches("\\d{10}")) {
+            return new CheckBusinessNumberResponse(false, "사업자번호는 숫자 10자리여야 합니다.");
+        }
+        if (userRepository.existsByBusinessNumber(normalizedBusinessNumber)) {
+            return new CheckBusinessNumberResponse(false, "이미 등록된 사업자번호입니다.");
+        }
+        return new CheckBusinessNumberResponse(true, "사용 가능한 사업자번호입니다.");
+    }
+
+    public MarketInfoResponse enterMarketInfo(MarketInfoRequest request) {
+        if (request.businessName() == null || request.businessName().isBlank()) {
+            throw new IllegalArgumentException("사업장 이름을 입력해 주세요.");
+        }
+        if (request.businessOwnerName() == null || request.businessOwnerName().isBlank()) {
+            throw new IllegalArgumentException("사업자 이름을 입력해 주세요.");
+        }
+        if (request.businessCategory() == null || request.businessCategory().isBlank()) {
+            throw new IllegalArgumentException("사업장 카테고리를 선택해 주세요.");
+        }
+
+        String normalizedBusinessNumber = normalizeBusinessNumber(request.businessNumber());
+        CheckBusinessNumberResponse checked = checkBusinessNumber(normalizedBusinessNumber);
+        if (!checked.available()) {
+            throw new IllegalArgumentException(checked.message());
+        }
+
+        Seller seller = new Seller(
+                null,
+                "",
+                "",
+                request.businessOwnerName(),
+                true,
+                request.businessName(),
+                request.businessOwnerName(),
+                normalizedBusinessNumber,
+                request.businessCategory()
+        );
+        return new MarketInfoResponse(seller.getBusinessName(), seller.getBusinessOwnerName(), seller.getBusinessNumber(), seller.getBusinessCategory());
     }
 
     public UserResponse me(Long userId) {
@@ -124,10 +186,15 @@ public class AuthService {
     public void deleteAddress(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        if ("seller".equals(user.role())) {
+        if ("seller".equals(user.getRole())) {
             throw new IllegalArgumentException("판매자 계정은 위치 정보를 삭제할 수 없습니다. 위치 변경만 가능합니다.");
         }
         userRepository.deleteDefaultAddress(userId);
+    }
+
+    private String normalizeBusinessNumber(String businessNumber) {
+        if (businessNumber == null) return "";
+        return businessNumber.replaceAll("[^0-9]", "");
     }
 
     private AuthResponse toAuthResponse(User user) {
@@ -135,6 +202,8 @@ public class AuthService {
     }
 
     private UserResponse toUserResponse(User user) {
-        return new UserResponse(user.id(), user.userId(), user.name(), user.role(), user.notificationEnabled());
+        return new UserResponse(user.getId(), user.getUserId(), user.getName(), user.getRole(), user.isNotificationEnabled());
     }
 }
+
+

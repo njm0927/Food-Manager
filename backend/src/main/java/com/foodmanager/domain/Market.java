@@ -14,4 +14,24 @@ public class Market {
         this.businessNumber = businessNumber;
         this.address = address;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getSellerId() {
+        return sellerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getBusinessNumber() {
+        return businessNumber;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
 }
