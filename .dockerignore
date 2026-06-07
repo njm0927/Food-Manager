@@ -1,11 +1,15 @@
 .git
 .github
-node_modules
-mobile/node_modules
-backend/target
-dist
 .env
 .env.*
 !.env.example
-npm-debug.log*
 
+backend/target
+mobile/node_modules
+mobile/.expo
+mobile/android
+mobile/ios
+
+node_modules
+dist
+npm-debug.log*

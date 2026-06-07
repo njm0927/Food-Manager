@@ -4,8 +4,10 @@
     "slug": "food-manager",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ecfdf5"
     },
@@ -19,6 +21,10 @@
     "android": {
       "package": "com.foodmanager.app",
       "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ecfdf5"
+      },
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE",
@@ -26,7 +32,6 @@
       ]
     },
     "plugins": [
-      "expo-notifications",
       [
         "expo-build-properties",
         {
@@ -34,7 +39,9 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-notifications",
+      "expo-status-bar"
     ],
     "extra": {
       "apiBaseUrl": "http://43.201.78.197:8080",

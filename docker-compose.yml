@@ -8,9 +8,14 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-fm_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
     ports:
-      - "${POSTGRES_HOST_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - food_manager_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fm_user} -d ${POSTGRES_DB:-food_manager_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -18,33 +23,17 @@ services:
     container_name: food-manager-backend
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-      PORT: ${BACKEND_PORT:-8080}
-      JDBC_DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-food_manager_db}
-      DB_USERNAME: ${POSTGRES_USER:-fm_user}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
-      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret}
-      FOODSAFETY_API_KEY: ${FOODSAFETY_API_KEY:-84bfd51958a44907a079}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:4173,http://localhost:4173}
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-food_manager_db}
+      DATABASE_USERNAME: ${POSTGRES_USER:-fm_user}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret-for-food-manager}
+      FOODSAFETY_API_KEY: ${FOODSAFETY_API_KEY:-}
+      PORT: 8080
     ports:
       - "${BACKEND_PORT:-8080}:8080"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
-    container_name: food-manager-web
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "${WEB_PORT:-80}:80"
 volumes:
   food_manager_pgdata:
-

@@ -196,6 +196,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 id bigserial primary key,
                 seller_id bigint,
                 food_id bigint,
+                quantity integer default 1,
                 original_price numeric(12, 2),
                 sale_price numeric(12, 2),
                 discount_rate integer,
@@ -209,6 +210,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
         jdbc.execute("alter table sale_info add column if not exists seller_id bigint");
         jdbc.execute("alter table sale_info add column if not exists food_id bigint");
+        jdbc.execute("alter table sale_info add column if not exists quantity integer default 1");
         jdbc.execute("alter table sale_info add column if not exists original_price numeric(12, 2)");
         jdbc.execute("alter table sale_info add column if not exists sale_price numeric(12, 2)");
         jdbc.execute("alter table sale_info add column if not exists discount_rate integer");

@@ -15,7 +15,7 @@ public class SaleService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public record SaleCreateRequest(Long foodId, BigDecimal originalPrice, BigDecimal salePrice, LocalDate startDate, LocalDate endDate) {
+    public record SaleCreateRequest(Long foodId, Integer quantity, BigDecimal originalPrice, BigDecimal salePrice, LocalDate startDate, LocalDate endDate) {
     }
 
     public record SaleResponse(Long id, Long foodId, String foodName, String category, Integer quantity, String unit, BigDecimal originalPrice, BigDecimal salePrice, Integer discountRate, LocalDate startDate, LocalDate endDate, String marketName, String marketAddress) {
@@ -26,7 +26,7 @@ public class SaleService {
 
     public List<SaleResponse> findAll(Long sellerId) {
         return jdbcTemplate.query("""
-                select s.id, s.food_id, f.item_name, f.category, f.quantity, f.unit, s.original_price, s.sale_price, s.discount_rate, s.start_date, s.end_date,
+                select s.id, s.food_id, f.item_name, f.category, coalesce(s.quantity, f.quantity) as quantity, f.unit, s.original_price, s.sale_price, s.discount_rate, s.start_date, s.end_date,
                        null as market_name, null as market_address
                 from sale_info s
                 join food_items f on f.id = s.food_id
@@ -56,7 +56,7 @@ public class SaleService {
         if (region == null || region.isBlank()) return List.of();
         String pattern = "%" + region.trim() + "%";
         return jdbcTemplate.query("""
-                select s.id, s.food_id, f.item_name, f.category, f.quantity, f.unit, s.original_price, s.sale_price, s.discount_rate, s.start_date, s.end_date,
+                select s.id, s.food_id, f.item_name, f.category, coalesce(s.quantity, f.quantity) as quantity, f.unit, s.original_price, s.sale_price, s.discount_rate, s.start_date, s.end_date,
                        coalesce(si.business_name, u.name) as market_name,
                        a.address as market_address
                 from sale_info s
@@ -89,8 +89,15 @@ public class SaleService {
 
     public SaleResponse create(Long sellerId, SaleCreateRequest request) {
         validate(request);
-        Integer owned = jdbcTemplate.queryForObject("select count(*) from food_items where id = ? and (owner_id = ? or seller_id = ?)", Integer.class, request.foodId(), sellerId, sellerId);
-        if (owned == null || owned == 0) throw new IllegalArgumentException("내 식료품만 할인 등록할 수 있습니다.");
+        List<Integer> ownedQuantities = jdbcTemplate.query(
+                "select coalesce(quantity, 0) from food_items where id = ? and (owner_id = ? or seller_id = ?)",
+                (rs, rowNum) -> rs.getInt(1),
+                request.foodId(), sellerId, sellerId
+        );
+        if (ownedQuantities.isEmpty()) throw new IllegalArgumentException("내 식료품만 할인 등록할 수 있습니다.");
+        int foodQuantity = ownedQuantities.get(0);
+        int saleQuantity = request.quantity() == null ? foodQuantity : request.quantity();
+        if (saleQuantity < 0) throw new IllegalArgumentException("할인 등록 수량은 0개 이상이어야 합니다.");
         Integer activeSaleCount = jdbcTemplate.queryForObject("""
                 select count(*)
                 from sale_info
@@ -104,10 +111,10 @@ public class SaleService {
 
         int discountRate = request.originalPrice().subtract(request.salePrice()).multiply(BigDecimal.valueOf(100)).divide(request.originalPrice(), 0, java.math.RoundingMode.HALF_UP).intValue();
         Long id = jdbcTemplate.queryForObject("""
-                insert into sale_info (seller_id, food_id, original_price, sale_price, discount_rate, start_date, end_date)
-                values (?, ?, ?, ?, ?, ?, ?)
+                insert into sale_info (seller_id, food_id, quantity, original_price, sale_price, discount_rate, start_date, end_date)
+                values (?, ?, ?, ?, ?, ?, ?, ?)
                 returning id
-                """, Long.class, sellerId, request.foodId(), request.originalPrice(), request.salePrice(), discountRate, request.startDate(), request.endDate());
+                """, Long.class, sellerId, request.foodId(), saleQuantity, request.originalPrice(), request.salePrice(), discountRate, request.startDate(), request.endDate());
         SaleResponse sale = findAll(sellerId).stream().filter((item) -> item.id().equals(id)).findFirst().orElseThrow();
         notifyNearbyConsumers(sellerId, sale);
         return sale;
@@ -119,6 +126,7 @@ public class SaleService {
 
     private void validate(SaleCreateRequest request) {
         if (request.foodId() == null) throw new IllegalArgumentException("할인 품목을 선택해 주세요.");
+        if (request.quantity() != null && request.quantity() < 0) throw new IllegalArgumentException("할인 등록 수량은 0개 이상이어야 합니다.");
         if (request.originalPrice() == null || request.originalPrice().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("정가는 0보다 커야 합니다.");
         if (request.salePrice() == null || request.salePrice().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("할인가는 0보다 커야 합니다.");
         if (request.salePrice().compareTo(request.originalPrice()) >= 0) throw new IllegalArgumentException("할인가는 정가보다 낮아야 합니다.");

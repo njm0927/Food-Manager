@@ -7,14 +7,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-backend/target
-*.local
+# Environment files
 .env
+.env.*
+!.env.example
+!mobile/.env.example
 
-# Editor directories and files
+# Local/generated files
+node_modules/
+dist/
+dist-ssr/
+.vite/
+backend/target/
+mobile/node_modules/
+mobile/.expo/
+mobile/android/
+mobile/ios/
+
+# Editor and OS files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -24,3 +34,4 @@ backend/target
 *.njsproj
 *.sln
 *.sw?
+

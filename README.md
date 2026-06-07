@@ -1,57 +1,46 @@
 # Food Manager
 
-React + Vite + Tailwind CSS 프론트엔드와 Node/Express + PostgreSQL 백엔드로 만든 Food Manager 프로토타입입니다.
+Food Manager는 Spring Boot 백엔드, PostgreSQL 데이터베이스, Expo/React Native 모바일 앱으로 구성된 식료품 관리 앱입니다. 현재 배포 대상은 모바일 앱과 백엔드 API입니다.
 
-## 실행 준비
+## 프로젝트 구조
+
+```text
+backend/   Spring Boot API 서버
+mobile/    Expo React Native 앱
+docker-compose.yml   PostgreSQL + 백엔드 실행 설정
+```
+
+## 백엔드 실행
+
+EC2 또는 로컬 Docker 환경에서 다음 명령으로 PostgreSQL과 백엔드를 실행합니다.
 
 ```bash
-npm install
-copy .env.example .env
+docker compose up -d --build
 ```
 
-`.env`에서 PostgreSQL 접속 정보를 자신의 환경에 맞게 수정합니다.
-
-```env
-DATABASE_URL=postgres://fm_user:your_db_password@localhost:5432/food_manager_db
-JWT_SECRET=change-this-to-a-long-random-secret
-PORT=8080
-FOODSAFETY_API_KEY=sample
-```
-
-## DB 생성
-
-Docker로 테스트 DB를 실행할 수 있습니다.
+백엔드 상태 확인:
 
 ```bash
-docker compose up -d
+curl http://localhost:8080/api/health
 ```
 
-그 다음 스키마와 데모 데이터를 넣습니다.
+## 모바일 앱
 
-```bash
-npm run db:schema
-npm run db:seed
+모바일 앱은 `mobile/` 폴더에서 관리합니다.
+
+```powershell
+cd mobile
+npm.cmd install
+npm.cmd exec -- expo start
 ```
 
-데모 계정:
+APK 빌드는 EAS preview 프로필을 사용합니다.
 
-- 소비자: `consumer` / `1234567`
-- 판매자: `seller` / `1234567`
-
-## 개발 서버
-
-```bash
-npm run dev
+```powershell
+cd mobile
+eas build -p android --profile preview
 ```
 
-프론트엔드는 Vite로 열리고, `/api` 요청은 Express 서버(`http://127.0.0.1:8080`)로 프록시됩니다.
+## 환경 변수
 
-## 구현된 연동
-
-- PostgreSQL 테이블: `users`, `seller_info`, `addresses`, `food_items`, `discount_info`, `notification_log`, `recipe_bookmarks`
-- 로그인/회원가입 JWT 인증
-- 식료품 CRUD
-- 판매자 할인 등록/삭제, 소비자 주변 할인 조회
-- 카카오 우편번호 서비스 주소 입력
-- 식품안전나라 `COOKRCP01` 레시피 API 프록시
-- Tailwind CSS 기반 UI
+배포 서버에서는 `.env` 파일에 PostgreSQL, JWT, 식품안전나라 API 키를 설정합니다. 예시는 `.env.example`을 참고합니다.

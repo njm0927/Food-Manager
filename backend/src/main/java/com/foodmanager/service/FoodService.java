@@ -85,12 +85,19 @@ public class FoodService {
         int threshold = days.stream().mapToInt(Integer::intValue).max().orElse(0);
         if (threshold <= 0) return findNotifications(userId);
 
+        boolean notify1Day = days.contains(1);
+        boolean notify3Days = days.contains(3);
+        boolean notify7Days = days.contains(7);
+
         jdbcTemplate.update("""
                 insert into app_notifications (user_id, type, title, body, reference_id, is_read)
                 select ?, 'expiry', '소비기한 알림',
+                       food_name || ' 소비기한이 ' ||
                        case
-                         when (expiry_date - current_date) = 0 then food_name || ' 소비기한이 오늘까지입니다.'
-                         else food_name || ' 소비기한이 ' || (expiry_date - current_date) || '일 남았습니다.'
+                         when ? and (expiry_date - current_date) <= 1 then '1일이내입니다.'
+                         when ? and (expiry_date - current_date) <= 3 then '3일이내입니다.'
+                         when ? and (expiry_date - current_date) <= 7 then '7일이내입니다.'
+                         else (expiry_date - current_date) || '일이내입니다.'
                        end,
                        id,
                        false
@@ -107,7 +114,7 @@ public class FoodService {
                       and n.reference_id = f.id
                       and n.created_at::date = current_date
                   )
-                """, userId, userId, userId, threshold, userId);
+                """, userId, notify1Day, notify3Days, notify7Days, userId, userId, threshold, userId);
 
         return findNotifications(userId);
     }
@@ -144,3 +151,4 @@ public class FoodService {
         );
     }
 }
+
