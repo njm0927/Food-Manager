@@ -26,9 +26,9 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-food_manager_db}
-      DATABASE_USERNAME: ${POSTGRES_USER:-fm_user}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
+      JDBC_DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-food_manager_db}
+      DB_USERNAME: ${POSTGRES_USER:-fm_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
       JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret-for-food-manager}
       FOODSAFETY_API_KEY: ${FOODSAFETY_API_KEY:-}
       PORT: 8080
@@ -37,3 +37,4 @@ services:
 
 volumes:
   food_manager_pgdata:
+
