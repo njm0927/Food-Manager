@@ -778,7 +778,6 @@ function FoodsView({
             label="소비기한"
             value={foodForm.noExpiry ? '' : foodForm.expiryDate}
             disabled={foodForm.noExpiry}
-            minDate={todayIso()}
             onChange={(expiryDate) => setFoodForm({ ...foodForm, expiryDate, noExpiry: false })}
           />
           <Chip label="소비기한을 모르겠어요" active={foodForm.noExpiry} onPress={() => setFoodForm({ ...foodForm, noExpiry: !foodForm.noExpiry, expiryDate: foodForm.noExpiry ? defaultExpiryDate(foodForm.category) : '' })} />
