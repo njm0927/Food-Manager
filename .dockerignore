@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+
+backend/target
+mobile/node_modules
+mobile/.expo
+mobile/android
+mobile/ios
+
+node_modules
+dist
+npm-debug.log*

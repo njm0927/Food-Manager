@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: food-manager-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-food_manager_db}
+      POSTGRES_USER: ${POSTGRES_USER:-fm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - food_manager_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fm_user} -d ${POSTGRES_DB:-food_manager_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: food-manager-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      JDBC_DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-food_manager_db}
+      DB_USERNAME: ${POSTGRES_USER:-fm_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-fm_password}
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret-for-food-manager}
+      FOODSAFETY_API_KEY: ${FOODSAFETY_API_KEY:-}
+      PORT: 8080
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+volumes:
+  food_manager_pgdata:
+
